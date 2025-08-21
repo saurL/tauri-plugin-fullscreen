@@ -3,51 +3,34 @@ import Tauri
 import UIKit
 import WebKit
 
-
 class FullscreenPlugin: Plugin {
-    private var webviewRef: WKWebView?  // <- ajouter ça
+    private var webviewRef: WKWebView?
 
-   @objc open override func load(webview: WKWebView) {
+    @objc open override func load(webview: WKWebView) {
         self.webviewRef = webview
 
-        guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else { return }
-        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+              let rootVC = keyWindow.rootViewController else { return }
+
         rootVC.edgesForExtendedLayout = .all
         rootVC.extendedLayoutIncludesOpaqueBars = true
-        
+
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
-        webview.scrollView.contentInsetAdjustmentBehavior = .never
-        
-        webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webview.frame = rootVC.view.bounds
-        
-        UIApplication.shared.keyWindow?.backgroundColor = .white
-     NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillShow),
-            name: UIResponder.keyboardWillShowNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardWillHide),
-            name: UIResponder.keyboardWillHideNotification,
-            object: nil
-        )
-    }
+        webview.scrollView.contentInsetAdjustmentBehavior = .automatic  // <-- iOS gère le clavier
+        webview.isUserInteractionEnabled = true
 
-    @objc func keyboardWillShow(notification: Notification) {
-        guard let webview = webviewRef,
-              let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-        webview.scrollView.contentInset.bottom = keyboardFrame.height
-        webview.scrollView.scrollIndicatorInsets.bottom = keyboardFrame.height
-    }
+        rootVC.view.addSubview(webview)
+        webview.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            webview.topAnchor.constraint(equalTo: rootVC.view.topAnchor),
+            webview.bottomAnchor.constraint(equalTo: rootVC.view.bottomAnchor),
+            webview.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor),
+            webview.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor)
+        ])
 
-    @objc func keyboardWillHide(notification: Notification) {
-        guard let webview = webviewRef else { return }
-        webview.scrollView.contentInset.bottom = 0
-        webview.scrollView.scrollIndicatorInsets.bottom = 0
+        keyWindow.backgroundColor = .white
     }
 }
 
