@@ -2,7 +2,6 @@ import SwiftRs
 import Tauri
 import UIKit
 import WebKit
-
 class FullscreenPlugin: Plugin {
     private var webviewRef: WKWebView?
 
@@ -21,7 +20,7 @@ class FullscreenPlugin: Plugin {
 
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
-        webview.scrollView.contentInsetAdjustmentBehavior = .never
+        webview.scrollView.contentInsetAdjustmentBehavior = .automatic // <-- iOS gère le clavier
         webview.isUserInteractionEnabled = true
 
         // Ajout safe du WebView
@@ -42,6 +41,7 @@ class FullscreenPlugin: Plugin {
         keyWindow.backgroundColor = .white
     }
 }
+
 
 
 @_cdecl("init_plugin_fullscreen")
