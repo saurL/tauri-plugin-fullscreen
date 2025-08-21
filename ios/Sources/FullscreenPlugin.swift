@@ -21,7 +21,7 @@ class FullscreenPlugin: Plugin {
 
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
-        webview.scrollView.contentInsetAdjustmentBehavior = .automatic
+        webview.scrollView.contentInsetAdjustmentBehavior = .never
         webview.isUserInteractionEnabled = true
 
         // Ajout safe du WebView
