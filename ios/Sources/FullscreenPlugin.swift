@@ -5,7 +5,11 @@ import WebKit
 
 
 class FullscreenPlugin: Plugin {
+    private var webviewRef: WKWebView?  // <- ajouter ça
+
    @objc open override func load(webview: WKWebView) {
+        self.webviewRef = webview
+
         guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else { return }
         
         rootVC.edgesForExtendedLayout = .all
@@ -13,12 +17,37 @@ class FullscreenPlugin: Plugin {
         
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
-        webview.scrollView.contentInsetAdjustmentBehavior = .automatic
+        webview.scrollView.contentInsetAdjustmentBehavior = .never
         
         webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webview.frame = rootVC.view.bounds
         
         UIApplication.shared.keyWindow?.backgroundColor = .white
+     NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+
+    @objc func keyboardWillShow(notification: Notification) {
+        guard let webview = webviewRef,
+              let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        webview.scrollView.contentInset.bottom = keyboardFrame.height
+        webview.scrollView.scrollIndicatorInsets.bottom = keyboardFrame.height
+    }
+
+    @objc func keyboardWillHide(notification: Notification) {
+        guard let webview = webviewRef else { return }
+        webview.scrollView.contentInset.bottom = 0
+        webview.scrollView.scrollIndicatorInsets.bottom = 0
     }
 }
 
