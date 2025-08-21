@@ -20,7 +20,7 @@ class FullscreenPlugin: Plugin {
 
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
-        webview.scrollView.contentInsetAdjustmentBehavior = .automatic // <-- iOS gère le clavier
+        webview.scrollView.contentInsetAdjustmentBehavior = .never // <-- iOS gère le clavier
         webview.isUserInteractionEnabled = true
 
         // Ajout safe du WebView
