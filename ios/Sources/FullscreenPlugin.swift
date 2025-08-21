@@ -5,7 +5,11 @@ import WebKit
 
 
 class FullscreenPlugin: Plugin {
+    private weak var webviewRef: WKWebView?
+
     @objc open override func load(webview: WKWebView) {
+        self.webviewRef = webview
+
         guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else { return }
 
         rootVC.edgesForExtendedLayout = .all
@@ -15,16 +19,7 @@ class FullscreenPlugin: Plugin {
         webview.scrollView.backgroundColor = .clear
         webview.scrollView.contentInsetAdjustmentBehavior = .automatic
         webview.isUserInteractionEnabled = true
-
-        // Laisser iOS gérer le frame via Auto Layout
-        webview.translatesAutoresizingMaskIntoConstraints = false
-        rootVC.view.addSubview(webview)
-        NSLayoutConstraint.activate([
-            webview.topAnchor.constraint(equalTo: rootVC.view.topAnchor),
-            webview.bottomAnchor.constraint(equalTo: rootVC.view.bottomAnchor),
-            webview.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor),
-            webview.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor)
-        ])
+        webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         UIApplication.shared.keyWindow?.backgroundColor = .white
 
@@ -44,14 +39,14 @@ class FullscreenPlugin: Plugin {
     }
 
     @objc func keyboardWillShow(notification: Notification) {
-        guard let webview = UIApplication.shared.keyWindow?.subviews.compactMap({ $0 as? WKWebView }).first,
+        guard let webview = webviewRef,
               let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
         webview.scrollView.contentInset.bottom = keyboardFrame.height
         webview.scrollView.scrollIndicatorInsets.bottom = keyboardFrame.height
     }
 
     @objc func keyboardWillHide(notification: Notification) {
-        guard let webview = UIApplication.shared.keyWindow?.subviews.compactMap({ $0 as? WKWebView }).first else { return }
+        guard let webview = webviewRef else { return }
         webview.scrollView.contentInset.bottom = 0
         webview.scrollView.scrollIndicatorInsets.bottom = 0
     }
