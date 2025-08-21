@@ -13,7 +13,7 @@ class FullscreenPlugin: Plugin {
         
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
-        webview.scrollView.contentInsetAdjustmentBehavior = .automatic
+        webview.scrollView.contentInsetAdjustmentBehavior = .never
         
         webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webview.frame = rootVC.view.bounds
